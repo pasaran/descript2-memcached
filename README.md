@@ -6,8 +6,9 @@
 const de = require('descript2');
 const deMemcached = require('descript2-memcached');
 
-const context = new de.Context(req, res);
-context.cache = new deMemcached(myCacheConfig);
+const context = new de.Context(req, res, {
+    cache: new deMemcached(myCacheConfig)  
+});
 ```
 
 ## Config
