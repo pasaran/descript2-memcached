@@ -1,0 +1,33 @@
+{
+  "name": "descript2-memcached",
+  "version": "1.0.0",
+  "description": " memcached plugin for descript2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/doochik/descript2-memcached.git"
+  },
+  "keywords": [
+    "descript2",
+    "memcached"
+  ],
+  "author": "Aleksei Androsov <doochik@ya.ru>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/doochik/descript2-memcached/issues"
+  },
+  "homepage": "https://github.com/doochik/descript2-memcached#readme",
+  "engines": {
+    "node": ">= 8.0.0"
+  },
+  "dependencies": {
+    "memcached": "^2.2.2"
+  },
+  "peerDependencies": {
+    "descript2": "*",
+    "nommon": "*"
+  }
+}
