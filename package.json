@@ -24,6 +24,7 @@
     "node": ">= 8.0.0"
   },
   "dependencies": {
+    "contimer": "^1.0.0",
     "memcached": "^2.2.2"
   },
   "peerDependencies": {
