@@ -12,7 +12,7 @@ class DescriptMemcached {
 
     constructor(options, context) {
         if (!context) {
-            throw '[descript2-memcached] context is required!';
+            throw '[descript2-memcached] descript context is required!';
         }
 
         this._options = Object.assign({
