@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/doochik/descript2-memcached.svg?branch=master)](https://travis-ci.org/doochik/descript2-memcached)
+[![NPM version](https://badge.fury.io/js/descript2-memcached.svg)](https://www.npmjs.com/package/descript2-memcached)
+
+
 # descript2-memcached
 
 ## Usage
