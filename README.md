@@ -15,6 +15,7 @@ const context = new de.Context(req, res, {
 
 ```
 {
+    servers: 'my-memcached-server:9000'// memcached servers @see https://github.com/3rd-Eden/memcached#options
     defaultKeyTTL: 60 * 60 * 24, // key ttl in seconds
     generation: 1, // increment generation to invalidate all key across breaking changes releases
     readTimeout: 100, // read timeout in milliseconds,
