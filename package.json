@@ -1,6 +1,6 @@
 {
   "name": "descript2-memcached",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": " memcached plugin for descript2",
   "main": "index.js",
   "scripts": {
