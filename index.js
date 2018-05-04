@@ -104,7 +104,7 @@ class DescriptMemcached {
                 }
 
                 const totalTimer = totalTimerStop();
-                this._log('info', 'KEY_FOUND', { networkTimer, totalTimer, key, normalizedKey, message: data.length + ' bytes' });
+                this._log('info', 'READ_DONE', { networkTimer, totalTimer, key, normalizedKey, message: data.length + ' bytes' });
 
                 promise.resolve(parsedValue);
             }
@@ -160,7 +160,7 @@ class DescriptMemcached {
                     normalizedKey: normalizedKey,
                 });
             }
-            this._log('error', 'WRITE_DONE', { networkTimer, totalTimer, key, normalizedKey, message: json  .length + ' bytes' });
+            this._log('info', 'WRITE_DONE', { networkTimer, totalTimer, key, normalizedKey, message: json  .length + ' bytes' });
         });
     }
 
