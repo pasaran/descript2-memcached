@@ -159,8 +159,9 @@ class DescriptMemcached {
                     key: key,
                     normalizedKey: normalizedKey,
                 });
+            } else {
+                this._log('info', 'WRITE_DONE', { networkTimer, totalTimer, key, normalizedKey, message: json  .length + ' bytes' });
             }
-            this._log('info', 'WRITE_DONE', { networkTimer, totalTimer, key, normalizedKey, message: json  .length + ' bytes' });
         });
     }
 
