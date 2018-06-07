@@ -28,7 +28,7 @@
     "memcached": "^2.2.2"
   },
   "peerDependencies": {
-    "descript2": "*",
+    "descript2": ">=0.0.34",
     "nommon": "*"
   },
   "devDependencies": {

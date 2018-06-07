@@ -29,7 +29,10 @@ class DescriptMemcached {
         const optionsKey = JSON.stringify(options);
         if (!POOL[optionsKey]) {
             POOL[optionsKey] = new Memcached(options.servers, options.memcachedOptions);
-            this._context.info('[descript2-memcached] initialized with options ' + optionsKey);
+            this._log({
+                type: DescriptMemcached.EVENT.MEMCACHED_INITIALIZED,
+                options: options
+            });
         }
         this._client = POOL[optionsKey];
     }
@@ -48,12 +51,19 @@ class DescriptMemcached {
 
             const networkTimer = networkTimerStop();
             const totalTimer = totalTimerStop();
-            this._log('warn', 'READ_TIMEOUT', { networkTimer, totalTimer, key, normalizedKey });
+
+            this._log({
+                type: DescriptMemcached.EVENT.MEMCACHED_READ_TIMEOUT,
+                key,
+                normalizedKey,
+                timers: {
+                    network: networkTimer,
+                    total: totalTimer,
+                },
+            });
 
             promise.resolve(de.error({
-                id: 'MEMCACHED_READ_TIMEOUT',
-                key: key,
-                normalizedKey: normalizedKey,
+                id: DescriptMemcached.EVENT.MEMCACHED_READ_TIMEOUT,
             }));
         }, this._options.readTimeout);
 
@@ -67,44 +77,70 @@ class DescriptMemcached {
 
             if (error) {
                 const totalTimer = totalTimerStop();
-                this._log('error', 'READ_ERROR', { networkTimer, totalTimer, key, normalizedKey, error });
+                this._log({
+                    type: DescriptMemcached.EVENT.MEMCACHED_READ_ERROR,
+                    error,
+                    key,
+                    normalizedKey,
+                    timers: {
+                        network: networkTimer,
+                        total: totalTimer,
+                    },
+                });
 
                 promise.resolve(de.error({
-                    id: 'MEMCACHED_READ_ERROR',
-                    error: error,
-                    key: key,
-                    normalizedKey: normalizedKey,
+                    id: DescriptMemcached.EVENT.MEMCACHED_READ_ERROR,
                 }));
             } else if (!data) {
                 const totalTimer = totalTimerStop();
-                this._log('info', 'KEY_NOT_FOUND', { networkTimer, totalTimer, key, normalizedKey });
+                this._log({
+                    type: DescriptMemcached.EVENT.MEMCACHED_READ_KEY_NOT_FOUND,
+                    key,
+                    normalizedKey,
+                    timers: {
+                        network: networkTimer,
+                        total: totalTimer,
+                    },
+                });
 
                 promise.resolve(de.error({
-                    id: 'MEMCACHED_KEY_NOT_FOUND',
-                    key: key,
-                    normalizedKey: normalizedKey,
+                    id: DescriptMemcached.EVENT.MEMCACHED_READ_KEY_NOT_FOUND,
                 }));
             } else {
                 let parsedValue;
                 try {
                     parsedValue = JSON.parse(data);
-                } catch (err) {
-
+                } catch (error) {
                     const totalTimer = totalTimerStop();
-                    this._log('error', 'JSON_PARSING_FAILED', { networkTimer, totalTimer, key, normalizedKey });
+                    this._log({
+                        type: DescriptMemcached.EVENT.MEMCACHED_JSON_PARSING_FAILED,
+                        data,
+                        error,
+                        key,
+                        normalizedKey,
+                        timers: {
+                            network: networkTimer,
+                            total: totalTimer,
+                        },
+                    });
 
                     promise.resolve(de.error({
-                        id: 'MEMCACHED_JSON_PARSING_FAILED',
-                        value: data,
-                        error: error,
-                        key: key,
-                        normalizedKey: normalizedKey,
+                        id: DescriptMemcached.EVENT.MEMCACHED_JSON_PARSING_FAILED,
                     }));
                     return;
                 }
 
                 const totalTimer = totalTimerStop();
-                this._log('info', 'READ_DONE', { networkTimer, totalTimer, key, normalizedKey, message: data.length + ' bytes' });
+                this._log({
+                    type: DescriptMemcached.EVENT.MEMCACHED_READ_DONE,
+                    data,
+                    key,
+                    normalizedKey,
+                    timers: {
+                        network: networkTimer,
+                        total: totalTimer,
+                    },
+                });
 
                 promise.resolve(parsedValue);
             }
@@ -113,8 +149,8 @@ class DescriptMemcached {
         return promise;
     }
 
-    set(key, value, ttl = this._options.defaultKeyTTL) {
-        if (typeof value === 'undefined') {
+    set(key, data, ttl = this._options.defaultKeyTTL) {
+        if (typeof data === 'undefined') {
             return;
         }
 
@@ -124,16 +160,22 @@ class DescriptMemcached {
 
         let json;
         try {
-            json = JSON.stringify(value);
+            json = JSON.stringify(data);
         } catch (error) {
             const totalTimer = totalTimerStop();
-            this._log('error', 'WRITE_ERROR', { networkTimer: {}, totalTimer, key, normalizedKey, error });
+            this._log({
+                type: DescriptMemcached.EVENT.MEMCACHED_JSON_STRINGIFY_FAILED,
+                data,
+                error,
+                key,
+                normalizedKey,
+                timers: {
+                    network: {},
+                    total: totalTimer,
+                },
+            });
             de.error({
-                id: 'MEMCACHED_JSON_STRINGIFY_FAILED',
-                value: value,
-                error: error,
-                key: key,
-                normalizedKey: normalizedKey,
+                id: DescriptMemcached.EVENT.MEMCACHED_JSON_STRINGIFY_FAILED,
             });
             return;
         }
@@ -144,23 +186,43 @@ class DescriptMemcached {
             const networkTimer = networkTimerStop();
             const totalTimer = totalTimerStop();
             if (error) {
-                this._log('error', 'WRITE_ERROR', { networkTimer, totalTimer, key, normalizedKey, error });
-
+                this._log({
+                    type: DescriptMemcached.EVENT.MEMCACHED_WRITE_ERROR,
+                    error,
+                    key,
+                    normalizedKey,
+                    timers: {
+                        network: networkTimer,
+                        total: totalTimer,
+                    },
+                });
                 de.error({
-                    id: 'MEMCACHED_WRITE_ERROR',
-                    error: error,
-                    key: key,
-                    normalizedKey: normalizedKey,
+                    id: DescriptMemcached.EVENT.MEMCACHED_WRITE_ERROR,
                 });
             } else if (!done) {
-                this._log('error', 'WRITE_FAILED', { networkTimer, totalTimer, key, normalizedKey });
+                this._log({
+                    type: DescriptMemcached.EVENT.MEMCACHED_WRITE_FAILED,
+                    key,
+                    normalizedKey,
+                    timers: {
+                        network: networkTimer,
+                        total: totalTimer,
+                    },
+                });
                 de.error({
-                    id: 'MEMCACHED_WRITE_FAILED',
-                    key: key,
-                    normalizedKey: normalizedKey,
+                    id: DescriptMemcached.EVENT.MEMCACHED_WRITE_FAILED,
                 });
             } else {
-                this._log('info', 'WRITE_DONE', { networkTimer, totalTimer, key, normalizedKey, message: json  .length + ' bytes' });
+                this._log({
+                    type: DescriptMemcached.EVENT.MEMCACHED_WRITE_DONE,
+                    data: json,
+                    key,
+                    normalizedKey,
+                    timers: {
+                        network: networkTimer,
+                        total: totalTimer,
+                    },
+                });
             }
         });
     }
@@ -178,20 +240,25 @@ class DescriptMemcached {
             .digest('hex');
     }
 
-    _log(level, errorID, { networkTimer, totalTimer, key, normalizedKey, error, message }) {
-        let errMessage = message || '';
-        if (error) {
-            if (error.toString) {
-                errMessage = error.toString();
-            } else if (error.message) {
-                errMessage = error.message;
-            }
-        }
-
-        this._context[level](
-            `[descript2-memcached] ${ errorID } ${ networkTimer.time }/${ totalTimer.time } ${ normalizedKey }(${ key }) ${ errMessage }`
-        );
+    _log(event) {
+        this._context.logger.log(event, this._context);
     }
 }
+
+DescriptMemcached.EVENT = {
+    MEMCACHED_INITIALIZED: 'MEMCACHED_INITIALIZED',
+
+    MEMCACHED_JSON_PARSING_FAILED: 'MEMCACHED_JSON_PARSING_FAILED',
+    MEMCACHED_JSON_STRINGIFY_FAILED: 'MEMCACHED_JSON_STRINGIFY_FAILED',
+
+    MEMCACHED_READ_DONE: 'MEMCACHED_READ_DONE',
+    MEMCACHED_READ_ERROR: 'MEMCACHED_READ_ERROR',
+    MEMCACHED_READ_KEY_NOT_FOUND: 'MEMCACHED_READ_KEY_NOT_FOUND',
+    MEMCACHED_READ_TIMEOUT: 'MEMCACHED_READ_TIMEOUT',
+
+    MEMCACHED_WRITE_DONE: 'MEMCACHED_WRITE_DONE',
+    MEMCACHED_WRITE_ERROR: 'MEMCACHED_WRITE_ERROR',
+    MEMCACHED_WRITE_FAILED: 'MEMCACHED_WRITE_FAILED',
+};
 
 module.exports = DescriptMemcached;
