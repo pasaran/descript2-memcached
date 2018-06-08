@@ -41,6 +41,12 @@ class DescriptMemcached {
         const normalizedKey = this.normalizeKey(key);
         const promise = no.promise();
 
+        this._log({
+            type: DescriptMemcached.EVENT.MEMCACHED_READ_START,
+            key,
+            normalizedKey,
+        });
+
         const networkTimerStop = contimer.start({}, 'descript2-memcached.get.network');
         const totalTimerStop = contimer.start({}, 'descript2-memcached.get.total');
 
@@ -155,8 +161,13 @@ class DescriptMemcached {
         }
 
         const totalTimerStop = contimer.start({}, 'descript2-memcached.set.total');
-
         const normalizedKey = this.normalizeKey(key);
+
+        this._log({
+            type: DescriptMemcached.EVENT.MEMCACHED_WRITE_START,
+            key,
+            normalizedKey,
+        });
 
         let json;
         try {
@@ -254,11 +265,13 @@ DescriptMemcached.EVENT = {
     MEMCACHED_READ_DONE: 'MEMCACHED_READ_DONE',
     MEMCACHED_READ_ERROR: 'MEMCACHED_READ_ERROR',
     MEMCACHED_READ_KEY_NOT_FOUND: 'MEMCACHED_READ_KEY_NOT_FOUND',
+    MEMCACHED_READ_START: 'MEMCACHED_READ_START',
     MEMCACHED_READ_TIMEOUT: 'MEMCACHED_READ_TIMEOUT',
 
     MEMCACHED_WRITE_DONE: 'MEMCACHED_WRITE_DONE',
     MEMCACHED_WRITE_ERROR: 'MEMCACHED_WRITE_ERROR',
     MEMCACHED_WRITE_FAILED: 'MEMCACHED_WRITE_FAILED',
+    MEMCACHED_WRITE_START: 'MEMCACHED_READ_START',
 };
 
 module.exports = DescriptMemcached;
