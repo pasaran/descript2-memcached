@@ -31,7 +31,7 @@ class DescriptMemcached {
             POOL[optionsKey] = new Memcached(options.servers, options.memcachedOptions);
             this._log({
                 type: DescriptMemcached.EVENT.MEMCACHED_INITIALIZED,
-                options: options
+                options: options,
             });
         }
         this._client = POOL[optionsKey];
